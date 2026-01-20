@@ -1,0 +1,5 @@
+bin/
+*.class
+.LCK*
+mysql-connector-j-*.jar
+.github/
