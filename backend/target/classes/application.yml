@@ -1,0 +1,108 @@
+spring:
+  application:
+    name: ibank-api
+  
+  datasource:
+    url: jdbc:mysql://localhost:3306/java?useSSL=true&serverTimezone=UTC&characterEncoding=UTF-8
+    username: root
+    password: 
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+  
+  security:
+    user:
+      name: admin
+      password: admin
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:TroqueEstaPorUmaChaveSecretaForteComPeloMenos256BitsParaProducao}
+  expiration: 86400000 # 24 horas
+  refresh-expiration: 604800000 # 7 dias
+
+# Encryption
+encryption:
+  key: ${ENCRYPTION_KEY:TroqueEstaPorUmaChaveAES256Bits32Caracteres}
+  algorithm: AES/GCM/NoPadding
+
+# Internationalization
+ibank:
+  default-country: BR
+  default-language: pt-BR
+  default-currency: BRL
+  supported-countries: BR,PT
+  supported-languages: pt-BR,pt-PT
+  supported-currencies: BRL,EUR,USD
+
+# Exchange Rate API
+exchange:
+  api:
+    url: https://api.exchangerate-api.com/v4/latest
+    update-interval: 3600000 # 1 hora
+
+# Security
+security:
+  max-login-attempts: 5
+  lockout-duration: 900000 # 15 minutos
+  require-2fa-for-high-value: true
+  high-value-threshold: 5000.00
+
+# CORS
+cors:
+  allowed-origins: http://localhost:3000,http://localhost:19006
+  allowed-methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+  allowed-headers: "*"
+  exposed-headers: Authorization
+  allow-credentials: true
+
+# Rate Limiting
+rate-limit:
+  requests-per-minute: 60
+  requests-per-hour: 1000
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.ibank: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+  file:
+    name: logs/ibank.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# SpringDoc OpenAPI
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true

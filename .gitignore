@@ -3,3 +3,4 @@ bin/
 .LCK*
 mysql-connector-j-*.jar
 .github/
+node_modules

@@ -1,0 +1,83 @@
+{
+  "app": {
+    "name": "IBank Brasil",
+    "welcome": "Bem-vindo ao IBank",
+    "country": "Brasil",
+    "currency": "R$"
+  },
+  "auth": {
+    "login": "Entrar",
+    "logout": "Sair",
+    "register": "Cadastrar",
+    "cpf": "CPF",
+    "password": "Senha",
+    "remember": "Lembrar-me",
+    "forgot": "Esqueci minha senha",
+    "noAccount": "Não tem uma conta?",
+    "hasAccount": "Já tem uma conta?"
+  },
+  "menu": {
+    "dashboard": "Painel",
+    "transactions": "Transações",
+    "payments": "Pagamentos",
+    "investments": "Investimentos",
+    "cards": "Cartões",
+    "settings": "Configurações"
+  },
+  "dashboard": {
+    "balance": "Saldo Disponível",
+    "credit": "Crédito Disponível",
+    "monthSpending": "Gastos do Mês",
+    "recentTransactions": "Transações Recentes",
+    "quickActions": "Ações Rápidas",
+    "pix": "PIX",
+    "transfer": "Transferir",
+    "payment": "Pagar",
+    "deposit": "Depositar"
+  },
+  "transactions": {
+    "title": "Minhas Transações",
+    "filter": "Filtrar",
+    "date": "Data",
+    "type": "Tipo",
+    "value": "Valor",
+    "status": "Status",
+    "description": "Descrição",
+    "all": "Todas",
+    "deposit": "Depósito",
+    "withdraw": "Saque",
+    "transfer": "Transferência",
+    "pix": "PIX",
+    "payment": "Pagamento"
+  },
+  "payments": {
+    "title": "Pagamentos",
+    "barcode": "Código de Barras",
+    "scan": "Escanear",
+    "value": "Valor",
+    "dueDate": "Vencimento",
+    "pay": "Pagar",
+    "schedule": "Agendar"
+  },
+  "cards": {
+    "title": "Meus Cartões",
+    "virtual": "Cartão Virtual",
+    "physical": "Cartão Físico",
+    "limit": "Limite",
+    "available": "Disponível",
+    "invoice": "Fatura",
+    "block": "Bloquear",
+    "unblock": "Desbloquear"
+  },
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "close": "Fechar",
+    "loading": "Carregando...",
+    "success": "Sucesso",
+    "error": "Erro",
+    "warning": "Atenção",
+    "search": "Buscar"
+  }
+}

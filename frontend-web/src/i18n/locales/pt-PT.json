@@ -1,0 +1,83 @@
+{
+  "app": {
+    "name": "IBank Portugal",
+    "welcome": "Bem-vindo ao IBank",
+    "country": "Portugal",
+    "currency": "€"
+  },
+  "auth": {
+    "login": "Entrar",
+    "logout": "Sair",
+    "register": "Registar",
+    "cpf": "NIF",
+    "password": "Senha",
+    "remember": "Lembrar-me",
+    "forgot": "Esqueci-me da senha",
+    "noAccount": "Não tem uma conta?",
+    "hasAccount": "Já tem uma conta?"
+  },
+  "menu": {
+    "dashboard": "Painel",
+    "transactions": "Transacções",
+    "payments": "Pagamentos",
+    "investments": "Investimentos",
+    "cards": "Cartões",
+    "settings": "Definições"
+  },
+  "dashboard": {
+    "balance": "Saldo Disponível",
+    "credit": "Crédito Disponível",
+    "monthSpending": "Gastos do Mês",
+    "recentTransactions": "Transacções Recentes",
+    "quickActions": "Acções Rápidas",
+    "pix": "Transferência",
+    "transfer": "Transferir",
+    "payment": "Pagar",
+    "deposit": "Depositar"
+  },
+  "transactions": {
+    "title": "Minhas Transacções",
+    "filter": "Filtrar",
+    "date": "Data",
+    "type": "Tipo",
+    "value": "Valor",
+    "status": "Estado",
+    "description": "Descrição",
+    "all": "Todas",
+    "deposit": "Depósito",
+    "withdraw": "Levantamento",
+    "transfer": "Transferência",
+    "pix": "Transferência",
+    "payment": "Pagamento"
+  },
+  "payments": {
+    "title": "Pagamentos",
+    "barcode": "Referência",
+    "scan": "Digitalizar",
+    "value": "Valor",
+    "dueDate": "Vencimento",
+    "pay": "Pagar",
+    "schedule": "Agendar"
+  },
+  "cards": {
+    "title": "Meus Cartões",
+    "virtual": "Cartão Virtual",
+    "physical": "Cartão Físico",
+    "limit": "Limite",
+    "available": "Disponível",
+    "invoice": "Fatura",
+    "block": "Bloquear",
+    "unblock": "Desbloquear"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "close": "Fechar",
+    "loading": "A carregar...",
+    "success": "Sucesso",
+    "error": "Erro",
+    "warning": "Atenção",
+    "search": "Procurar"
+  }
+}
