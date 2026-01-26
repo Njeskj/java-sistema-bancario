@@ -1,5 +1,6 @@
 package com.ibank.controller;
 
+import com.ibank.dto.ContaResponse;
 import com.ibank.dto.TransferenciaRequest;
 import com.ibank.model.Conta;
 import com.ibank.model.Transacao;
@@ -13,10 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/contas")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:19006"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:19006", "http://java.local:3000"})
 @RequiredArgsConstructor
 public class ContaController {
 
@@ -24,9 +26,36 @@ public class ContaController {
     private final ContaRepository contaRepository;
 
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<Conta>> getContasByUsuario(@PathVariable Long usuarioId) {
-        List<Conta> contas = contaRepository.findByUsuarioId(usuarioId);
-        return ResponseEntity.ok(contas);
+    public ResponseEntity<?> getContasByUsuario(@PathVariable Long usuarioId) {
+        try {
+            List<Conta> contas = contaRepository.findByUsuarioId(usuarioId);
+            List<ContaResponse> response = contas.stream()
+                .map(this::toContaResponse)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of(
+                "erro", e.getMessage(),
+                "tipo", e.getClass().getSimpleName()
+            ));
+        }
+    }
+
+    private ContaResponse toContaResponse(Conta conta) {
+        return ContaResponse.builder()
+            .id(conta.getId())
+            .banco(conta.getBanco())
+            .agencia(conta.getAgencia())
+            .numeroConta(conta.getNumeroConta())
+            .digitoVerificador(conta.getDigitoVerificador())
+            .tipoConta(conta.getTipoConta() != null ? conta.getTipoConta().name() : null)
+            .saldoBrl(conta.getSaldoBrl())
+            .saldoEur(conta.getSaldoEur())
+            .saldoUsd(conta.getSaldoUsd())
+            .moedaPrincipal(conta.getMoedaPrincipal())
+            .ativa(true)
+            .build();
     }
 
     @GetMapping("/{contaId}")
@@ -113,9 +142,13 @@ public class ContaController {
             @RequestParam(required = false) String dataInicio,
             @RequestParam(required = false) String dataFim) {
         try {
+            System.out.println("[DEBUG] getExtrato chamado - contaId: " + contaId + ", dataInicio: " + dataInicio + ", dataFim: " + dataFim);
             List<Transacao> extrato = contaService.getExtrato(contaId, dataInicio, dataFim);
+            System.out.println("[DEBUG] Extrato retornou " + extrato.size() + " transações");
             return ResponseEntity.ok(extrato);
         } catch (Exception e) {
+            System.out.println("[ERRO] Erro ao buscar extrato: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of(
                     "sucesso", false,
                     "mensagem", e.getMessage()
@@ -131,14 +164,14 @@ public class ContaController {
             Conta conta = contaRepository.findById(contaId)
                     .orElseThrow(() -> new RuntimeException("Conta não encontrada"));
 
-            if (limites.containsKey("limiteDiarioPix")) {
-                conta.setLimiteDiarioPix(limites.get("limiteDiarioPix"));
+            if (limites.containsKey("limitePixDiario")) {
+                conta.setLimitePixDiario(limites.get("limitePixDiario"));
             }
-            if (limites.containsKey("limiteDiarioTransferencia")) {
-                conta.setLimiteDiarioTransferencia(limites.get("limiteDiarioTransferencia"));
+            if (limites.containsKey("limiteTransferenciaDiario")) {
+                conta.setLimiteTransferenciaDiario(limites.get("limiteTransferenciaDiario"));
             }
-            if (limites.containsKey("limiteDiarioSaque")) {
-                conta.setLimiteDiarioSaque(limites.get("limiteDiarioSaque"));
+            if (limites.containsKey("limiteSaqueDiario")) {
+                conta.setLimiteSaqueDiario(limites.get("limiteSaqueDiario"));
             }
 
             contaRepository.save(conta);

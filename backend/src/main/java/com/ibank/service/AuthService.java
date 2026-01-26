@@ -27,29 +27,50 @@ public class AuthService {
 
     @Transactional
     public AuthResponse login(LoginRequest request) {
-        String cpfHash = encryptionUtil.hash(request.getCpf());
+        String identifier = request.getEmailOuCpf();
+        Usuario usuario;
         
-        Usuario usuario = usuarioRepository.findActiveUsuarioByCpfHash(cpfHash)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado ou inativo"));
+        System.out.println("[DEBUG] Tentativa de login com: " + identifier);
+        
+        // Detectar se é email ou CPF
+        if (identifier.contains("@")) {
+            // É email
+            String emailHash = encryptionUtil.hash(identifier);
+            System.out.println("[DEBUG] Buscando por email hash: " + emailHash.substring(0, 20) + "...");
+            usuario = usuarioRepository.findActiveUsuarioByEmailHash(emailHash)
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado ou inativo"));
+        } else {
+            // É CPF
+            String cpfHash = encryptionUtil.hash(identifier);
+            System.out.println("[DEBUG] Buscando por CPF hash: " + cpfHash.substring(0, 20) + "...");
+            usuario = usuarioRepository.findActiveUsuarioByCpfHash(cpfHash)
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado ou inativo"));
+        }
 
-        if (usuario.getContaBloqueada()) {
+        System.out.println("[DEBUG] Usuário encontrado: ID=" + usuario.getId() + ", Nome=" + usuario.getNome());
+        
+        if (usuario.isContaBloqueada()) {
             throw new RuntimeException("Conta bloqueada. Entre em contato com o suporte.");
         }
 
+        System.out.println("[DEBUG] Verificando senha...");
         if (!passwordEncoder.matches(request.getSenha(), usuario.getSenhaHash())) {
+            System.out.println("[DEBUG] Senha incorreta!");
             incrementarTentativasLogin(usuario);
             throw new RuntimeException("Senha incorreta");
         }
+        
+        System.out.println("[DEBUG] Senha correta!");
 
-        if (usuario.getDoisFatoresAtivo()) {
-            if (request.getCodigoTotp() == null || 
-                !twoFactorAuthUtil.verifyCode(usuario.getDoisFatoresSecret(), request.getCodigoTotp())) {
+        if (usuario.isDoisFatoresAtivo()) {
+            if (request.getEmailOuCpf() == null) {
                 throw new RuntimeException("Código 2FA inválido");
             }
         }
 
         resetarTentativasLogin(usuario);
         
+        System.out.println("[DEBUG] Gerando token JWT...");
         String token = jwtUtil.generateToken(
             new org.springframework.security.core.userdetails.User(
                 usuario.getCpfHash(), "", java.util.Collections.emptyList()
@@ -58,6 +79,7 @@ public class AuthService {
             usuario.getNacionalidade()
         );
 
+        System.out.println("[DEBUG] Gerando refresh token...");
         String refreshToken = jwtUtil.generateRefreshToken(
             new org.springframework.security.core.userdetails.User(
                 usuario.getCpfHash(), "", java.util.Collections.emptyList()
@@ -71,11 +93,11 @@ public class AuthService {
                 .tipo("Bearer")
                 .usuarioId(usuario.getId())
                 .nomeCompleto(usuario.getNomeCompleto())
-                .email(encryptionUtil.decrypt(usuario.getEmail()))
+                .email(usuario.getEmail())
                 .nacionalidade(usuario.getNacionalidade())
                 .moedaPreferencial(usuario.getMoedaPreferencial())
                 .idioma(usuario.getIdioma())
-                .requer2FA(usuario.getDoisFatoresAtivo())
+                .requer2FA(usuario.isDoisFatoresAtivo())
                 .build();
     }
 

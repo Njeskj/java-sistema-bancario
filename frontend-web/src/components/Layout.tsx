@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Container, Navbar, Nav, Offcanvas, Dropdown } from 'react-bootstrap';
 import {
@@ -11,20 +11,113 @@ import {
   Logout,
   Menu as MenuIcon,
   Notifications,
+  DarkMode,
+  LightMode,
+  Person,
 } from '@mui/icons-material';
+import { useTheme } from '../contexts/ThemeContext';
+import api from '../services/api';
 import './Layout.css';
 
 const drawerWidth = 240;
 
+interface UserData {
+  id: number;
+  nome: string;
+  sobrenome: string;
+  email: string;
+  cpf: string;
+  telefone?: string;
+  nacionalidade?: string;
+  moedaPreferencial?: string;
+  idioma?: string;
+}
+
 export default function Layout() {
   const [showSidebar, setShowSidebar] = useState(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [userInitials, setUserInitials] = useState('');
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
+
+  useEffect(() => {
+    // Buscar dados do usuário do localStorage primeiro
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setUserData(user);
+        
+        // Calcular iniciais
+        const initials = getInitials(user.nome || '', user.sobrenome || '');
+        setUserInitials(initials);
+      } catch (error) {
+        console.error('Erro ao parsear dados do usuário:', error);
+      }
+    }
+
+    // Buscar dados atualizados do backend
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const usuarioId = localStorage.getItem('usuarioId');
+      if (!usuarioId) {
+        console.warn('usuarioId não encontrado no localStorage');
+        return;
+      }
+
+      const response = await api.get(`/usuarios/${usuarioId}`);
+      if (response.data) {
+        const user = response.data;
+        setUserData(user);
+        
+        // Atualizar localStorage
+        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('nomeCompleto', `${user.nome} ${user.sobrenome}`);
+        
+        // Calcular iniciais
+        const initials = getInitials(user.nome || '', user.sobrenome || '');
+        setUserInitials(initials);
+      }
+    } catch (error: any) {
+      console.error('Erro ao buscar dados do usuário:', error);
+      
+      // Se der erro 401/403, não fazer logout automático aqui
+      // O interceptor da API já trata isso
+      if (error.response?.status !== 401 && error.response?.status !== 403) {
+        // Para outros erros, manter os dados do localStorage
+        const storedUser = localStorage.getItem('user');
+        if (storedUser && !userData) {
+          try {
+            const user = JSON.parse(storedUser);
+            setUserData(user);
+            const initials = getInitials(user.nome || '', user.sobrenome || '');
+            setUserInitials(initials);
+          } catch (e) {
+            console.error('Erro ao parsear user do localStorage:', e);
+          }
+        }
+      }
+    }
+  };
+
+  const getInitials = (nome: string, sobrenome: string): string => {
+    const firstInitial = nome.charAt(0).toUpperCase();
+    const lastInitial = sobrenome.charAt(0).toUpperCase();
+    return `${firstInitial}${lastInitial}` || 'U';
+  };
 
   const handleCloseSidebar = () => setShowSidebar(false);
   const handleShowSidebar = () => setShowSidebar(true);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('usuarioId');
+    localStorage.removeItem('user');
+    localStorage.removeItem('nomeCompleto');
+    localStorage.removeItem('email');
     navigate('/login');
   };
 
@@ -62,21 +155,55 @@ export default function Layout() {
           </Navbar.Brand>
           
           <div className="d-flex align-items-center gap-2">
+            <button 
+              className="btn btn-link text-dark p-2 theme-toggle"
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
+            >
+              {theme === 'dark' ? <LightMode /> : <DarkMode />}
+            </button>
+            
             <button className="btn btn-link text-dark p-2">
               <Notifications />
             </button>
             
             <Dropdown align="end">
-              <Dropdown.Toggle variant="link" className="p-0 border-0 text-decoration-none">
-                <div className="avatar-circle">IS</div>
+              <Dropdown.Toggle 
+                variant="link" 
+                className="p-0 border-0 text-decoration-none"
+                data-testid="user-menu-toggle"
+              >
+                <div className="d-flex align-items-center gap-2">
+                  <div className="avatar-circle" data-testid="user-avatar">
+                    {userInitials || 'U'}
+                  </div>
+                  <div className="d-none d-md-block text-start">
+                    <div className="fw-semibold text-dark" style={{ fontSize: '0.9rem' }} data-testid="user-name">
+                      {userData ? `${userData.nome} ${userData.sobrenome}` : 'Usuário'}
+                    </div>
+                    <div className="text-muted" style={{ fontSize: '0.75rem' }} data-testid="user-email">
+                      {userData?.email || ''}
+                    </div>
+                  </div>
+                </div>
               </Dropdown.Toggle>
               <Dropdown.Menu>
-                <Dropdown.Item onClick={() => navigateTo('/settings')}>
+                <Dropdown.ItemText>
+                  <div className="px-2 py-1">
+                    <div className="fw-semibold">{userData ? `${userData.nome} ${userData.sobrenome}` : 'Usuário'}</div>
+                    <div className="text-muted small">{userData?.email || ''}</div>
+                    {userData?.cpf && (
+                      <div className="text-muted small">CPF: {userData.cpf}</div>
+                    )}
+                  </div>
+                </Dropdown.ItemText>
+                <Dropdown.Divider />
+                <Dropdown.Item onClick={() => navigateTo('/settings')} data-testid="dropdown-settings">
                   <Settings className="me-2" style={{ fontSize: '1.2rem' }} />
                   Configurações
                 </Dropdown.Item>
                 <Dropdown.Divider />
-                <Dropdown.Item onClick={handleLogout}>
+                <Dropdown.Item onClick={handleLogout} data-testid="dropdown-logout">
                   <Logout className="me-2" style={{ fontSize: '1.2rem' }} />
                   Sair
                 </Dropdown.Item>
@@ -98,6 +225,7 @@ export default function Layout() {
                 key={item.text}
                 className="sidebar-item"
                 onClick={() => navigateTo(item.path)}
+                data-testid={`nav-${item.text.toLowerCase().replace(/\s+/g, '-')}`}
               >
                 <span className="sidebar-icon">{item.icon}</span>
                 <span>{item.text}</span>
@@ -107,6 +235,7 @@ export default function Layout() {
             <button
               className="sidebar-item"
               onClick={() => navigateTo('/settings')}
+              data-testid="nav-settings"
             >
               <span className="sidebar-icon"><Settings /></span>
               <span>Configurações</span>
@@ -114,6 +243,7 @@ export default function Layout() {
             <button
               className="sidebar-item"
               onClick={handleLogout}
+              data-testid="btn-logout"
             >
               <span className="sidebar-icon"><Logout /></span>
               <span>Sair</span>
@@ -135,6 +265,7 @@ export default function Layout() {
                   key={item.text}
                   className="sidebar-item"
                   onClick={() => navigateTo(item.path)}
+                  data-testid={`nav-${item.text.toLowerCase().replace(/\s+/g, '-')}`}
                 >
                   <span className="sidebar-icon">{item.icon}</span>
                   <span>{item.text}</span>
@@ -144,6 +275,7 @@ export default function Layout() {
               <button
                 className="sidebar-item"
                 onClick={() => navigateTo('/settings')}
+                data-testid="nav-settings"
               >
                 <span className="sidebar-icon"><Settings /></span>
                 <span>Configurações</span>
@@ -151,6 +283,7 @@ export default function Layout() {
               <button
                 className="sidebar-item"
                 onClick={handleLogout}
+                data-testid="btn-logout"
               >
                 <span className="sidebar-icon"><Logout /></span>
                 <span>Sair</span>

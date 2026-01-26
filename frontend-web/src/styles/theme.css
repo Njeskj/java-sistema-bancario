@@ -1,0 +1,128 @@
+/* ===================================
+   VARIÁVEIS DO TEMA
+   =================================== */
+:root {
+  /* Light Theme (padrão) */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-sidebar: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  --bg-card: #ffffff;
+  
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --text-inverse: #ffffff;
+  
+  --border-color: #dee2e6;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.15);
+  
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  --gradient-warning: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-sidebar: linear-gradient(180deg, #2d3561 0%, #3f2a56 100%);
+  --bg-card: #16213e;
+  
+  --text-primary: #e4e4e4;
+  --text-secondary: #a0a0a0;
+  --text-inverse: #ffffff;
+  
+  --border-color: #2d3748;
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  --shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.7);
+  
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  --gradient-warning: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+/* ===================================
+   APLICAÇÃO DO TEMA
+   =================================== */
+body {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card,
+.modal-content,
+.dropdown-menu {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+  box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.navbar {
+  background-color: var(--bg-primary) !important;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-desktop,
+.offcanvas {
+  background: var(--bg-sidebar) !important;
+}
+
+.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+input,
+textarea,
+select {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border-color: #667eea;
+}
+
+/* Tabelas */
+.table {
+  color: var(--text-primary);
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: var(--bg-secondary);
+}
+
+/* Botões */
+.btn-outline-primary {
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.btn-outline-primary:hover {
+  background-color: #667eea;
+  border-color: #667eea;
+  color: white;
+}
+
+/* Toggle do tema */
+.theme-toggle {
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.theme-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}

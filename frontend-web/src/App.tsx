@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
 // Pages
+import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -14,6 +15,7 @@ import Settings from './pages/Settings';
 // Components
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -25,8 +27,11 @@ function App() {
   }, []);
 
   return (
-    <div className="d-flex min-vh-100 w-100 m-0 p-0">
+    <ErrorBoundary>
       <Routes>
+        {/* Rota pública inicial */}
+        <Route path="/" element={<Home />} />
+        
         {/* Rotas públicas */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -34,7 +39,6 @@ function App() {
         {/* Rotas privadas */}
         <Route element={<PrivateRoute isAuthenticated={isAuthenticated} />}>
           <Route element={<Layout />}>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/payments" element={<Payments />} />
@@ -45,9 +49,9 @@ function App() {
         </Route>
 
         {/* Rota 404 */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </div>
+    </ErrorBoundary>
   );
 }
 

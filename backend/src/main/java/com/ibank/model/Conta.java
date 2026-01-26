@@ -1,5 +1,6 @@
 package com.ibank.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +24,7 @@ public class Conta {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
+    @JsonIgnoreProperties({"contas", "senha", "senhaHash", "handler", "hibernateLazyInitializer"})
     private Usuario usuario;
 
     @Column(nullable = false, length = 50)
@@ -138,7 +140,20 @@ public class Conta {
     }
 
     public enum StatusConta {
-        ATIVA, BLOQUEADA, INATIVA, ENCERRADA
+        ATIVA("Ativa"),
+        BLOQUEADA("Bloqueada"),
+        INATIVA("Inativa"),
+        ENCERRADA("Encerrada");
+
+        private final String descricao;
+
+        StatusConta(String descricao) {
+            this.descricao = descricao;
+        }
+
+        public String getDescricao() {
+            return descricao;
+        }
     }
 
     /**

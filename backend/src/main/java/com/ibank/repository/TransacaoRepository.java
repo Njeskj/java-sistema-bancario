@@ -14,32 +14,32 @@ import java.util.List;
 @Repository
 public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
 
-    @Query("SELECT t FROM Transacao t WHERE (t.contaOrigemId = :contaId OR t.contaDestinoId = :contaId) " +
-           "AND t.dataHora BETWEEN :inicio AND :fim ORDER BY t.dataHora DESC")
+    @Query("SELECT t FROM Transacao t WHERE (t.contaOrigem.id = :contaId OR t.contaDestino.id = :contaId) " +
+           "AND t.dataTransacao BETWEEN :inicio AND :fim ORDER BY t.dataTransacao DESC")
     List<Transacao> findByContaAndPeriodo(
             @Param("contaId") Long contaId,
             @Param("inicio") LocalDateTime inicio,
             @Param("fim") LocalDateTime fim
     );
 
-    @Query("SELECT SUM(t.valor) FROM Transacao t WHERE t.contaOrigemId = :contaId " +
-           "AND t.tipo = :tipo AND DATE(t.dataHora) = :data")
+    @Query("SELECT SUM(t.valor) FROM Transacao t WHERE t.contaOrigem.id = :contaId " +
+           "AND t.tipoTransacao = :tipo AND DATE(t.dataTransacao) = :data")
     BigDecimal sumValorByContaAndTipoAndData(
             @Param("contaId") Long contaId,
-            @Param("tipo") String tipo,
+            @Param("tipo") Transacao.TipoTransacao tipo,
             @Param("data") LocalDate data
     );
 
-    @Query("SELECT t FROM Transacao t WHERE t.contaOrigemId = :contaId ORDER BY t.dataHora DESC")
+    @Query("SELECT t FROM Transacao t WHERE t.contaOrigem.id = :contaId ORDER BY t.dataTransacao DESC")
     List<Transacao> findByContaOrigemId(@Param("contaId") Long contaId);
 
-    @Query("SELECT t FROM Transacao t WHERE t.contaDestinoId = :contaId ORDER BY t.dataHora DESC")
+    @Query("SELECT t FROM Transacao t WHERE t.contaDestino.id = :contaId ORDER BY t.dataTransacao DESC")
     List<Transacao> findByContaDestinoId(@Param("contaId") Long contaId);
 
-    @Query("SELECT t FROM Transacao t WHERE t.status = :status ORDER BY t.dataHora DESC")
+    @Query("SELECT t FROM Transacao t WHERE t.status = :status ORDER BY t.dataTransacao DESC")
     List<Transacao> findByStatus(@Param("status") Transacao.StatusTransacao status);
 
-    @Query("SELECT COUNT(t) FROM Transacao t WHERE t.contaOrigemId = :contaId " +
-           "AND DATE(t.dataHora) = CURRENT_DATE")
+    @Query("SELECT COUNT(t) FROM Transacao t WHERE t.contaOrigem.id = :contaId " +
+           "AND DATE(t.dataTransacao) = CURRENT_DATE")
     Long countTransacoesHoje(@Param("contaId") Long contaId);
 }

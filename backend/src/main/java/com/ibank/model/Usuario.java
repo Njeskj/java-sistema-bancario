@@ -61,8 +61,8 @@ public class Usuario {
     @Column(name = "data_nascimento")
     private LocalDate dataNascimento;
 
-    @Enumerated(EnumType.STRING)
-    private Sexo sexo;
+    @Column(length = 30)
+    private String sexo;
 
     @Column(length = 2)
     private String nacionalidade = "BR";
@@ -70,9 +70,8 @@ public class Usuario {
     @Column(length = 100)
     private String naturalidade;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "estado_civil")
-    private EstadoCivil estadoCivil;
+    @Column(name = "estado_civil", length = 20)
+    private String estadoCivil;
 
     @Column(length = 100)
     private String profissao;
@@ -111,7 +110,7 @@ public class Usuario {
     private String enderecoPais = "BR";
 
     @Column(name = "dois_fatores_ativo")
-    private Boolean doisFatoresAtivo = false;
+    private boolean doisFatoresAtivo = false;
 
     @Column(name = "dois_fatores_secret")
     private String doisFatoresSecret;
@@ -120,7 +119,7 @@ public class Usuario {
     private Integer tentativasLoginFalhas = 0;
 
     @Column(name = "conta_bloqueada")
-    private Boolean contaBloqueada = false;
+    private boolean contaBloqueada = false;
 
     @Column(name = "data_ultimo_login")
     private LocalDateTime dataUltimoLogin;
@@ -135,7 +134,7 @@ public class Usuario {
     private String moedaPreferencial = "BRL";
 
     @Column(nullable = false)
-    private Boolean ativo = true;
+    private boolean ativo = true;
 
     @Column(name = "data_criacao")
     private LocalDateTime dataCriacao;
@@ -158,28 +157,6 @@ public class Usuario {
     @PreUpdate
     protected void onUpdate() {
         ultimaAtualizacao = LocalDateTime.now();
-    }
-
-    public enum Sexo {
-        M, F, OUTRO, PREFIRO_NAO_INFORMAR
-    }
-
-    public enum EstadoCivil {
-        SOLTEIRO("Solteiro"),
-        CASADO("Casado"),
-        DIVORCIADO("Divorciado"),
-        VIUVO("Viúvo"),
-        UNIAO_ESTAVEL("União Estável");
-
-        private final String descricao;
-
-        EstadoCivil(String descricao) {
-            this.descricao = descricao;
-        }
-
-        public String getDescricao() {
-            return descricao;
-        }
     }
 
     /**

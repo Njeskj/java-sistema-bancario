@@ -48,25 +48,25 @@ public class ContaService {
 
         // Debitar da origem
         BigDecimal novoSaldoOrigem = saldo.subtract(request.getValor());
-        contaOrigem.setSaldo(request.getMoeda(), novoSaldoOrigem);
+        contaOrigem.setSaldo(novoSaldoOrigem, request.getMoeda());
         contaRepository.save(contaOrigem);
 
         // Creditar no destino
         BigDecimal saldoDestino = contaDestino.getSaldo(request.getMoeda());
         BigDecimal novoSaldoDestino = saldoDestino.add(request.getValor());
-        contaDestino.setSaldo(request.getMoeda(), novoSaldoDestino);
+        contaDestino.setSaldo(novoSaldoDestino, request.getMoeda());
         contaRepository.save(contaDestino);
 
         // Registrar transação
         Transacao transacao = Transacao.builder()
-                .contaOrigemId(contaOrigem.getId())
-                .contaDestinoId(contaDestino.getId())
-                .tipo(Transacao.TipoTransacao.valueOf(request.getTipoTransferencia()))
+                .contaOrigem(contaOrigem)
+                .contaDestino(contaDestino)
+                .tipoTransacao(Transacao.TipoTransacao.valueOf(request.getTipoTransferencia()))
                 .valor(request.getValor())
                 .moeda(request.getMoeda())
                 .descricao(request.getDescricao())
                 .status(Transacao.StatusTransacao.CONCLUIDA)
-                .dataHora(LocalDateTime.now())
+                .dataTransacao(LocalDateTime.now())
                 .saldoAnteriorOrigem(saldo)
                 .saldoPosteriorOrigem(novoSaldoOrigem)
                 .saldoAnteriorDestino(saldoDestino)
@@ -83,18 +83,18 @@ public class ContaService {
 
         BigDecimal saldoAtual = conta.getSaldo(moeda);
         BigDecimal novoSaldo = saldoAtual.add(valor);
-        conta.setSaldo(moeda, novoSaldo);
+        conta.setSaldo(novoSaldo, moeda);
         contaRepository.save(conta);
 
         // Registrar transação
         Transacao transacao = Transacao.builder()
-                .contaDestinoId(conta.getId())
-                .tipo(Transacao.TipoTransacao.DEPOSITO)
+                .contaDestino(conta)
+                .tipoTransacao(Transacao.TipoTransacao.DEPOSITO)
                 .valor(valor)
                 .moeda(moeda)
                 .descricao("Depósito")
                 .status(Transacao.StatusTransacao.CONCLUIDA)
-                .dataHora(LocalDateTime.now())
+                .dataTransacao(LocalDateTime.now())
                 .saldoAnteriorDestino(saldoAtual)
                 .saldoPosteriorDestino(novoSaldo)
                 .build();
@@ -113,18 +113,18 @@ public class ContaService {
         }
 
         BigDecimal novoSaldo = saldoAtual.subtract(valor);
-        conta.setSaldo(moeda, novoSaldo);
+        conta.setSaldo(novoSaldo, moeda);
         contaRepository.save(conta);
 
         // Registrar transação
         Transacao transacao = Transacao.builder()
-                .contaOrigemId(conta.getId())
-                .tipo(Transacao.TipoTransacao.SAQUE)
+                .contaOrigem(conta)
+                .tipoTransacao(Transacao.TipoTransacao.SAQUE)
                 .valor(valor)
                 .moeda(moeda)
                 .descricao("Saque")
                 .status(Transacao.StatusTransacao.CONCLUIDA)
-                .dataHora(LocalDateTime.now())
+                .dataTransacao(LocalDateTime.now())
                 .saldoAnteriorOrigem(saldoAtual)
                 .saldoPosteriorOrigem(novoSaldo)
                 .build();
@@ -133,6 +133,9 @@ public class ContaService {
     }
 
     public List<Transacao> getExtrato(Long contaId, String dataInicio, String dataFim) {
+        System.out.println("[DEBUG] ContaService.getExtrato - contaId: " + contaId);
+        System.out.println("[DEBUG] dataInicio: " + dataInicio + ", dataFim: " + dataFim);
+        
         LocalDateTime inicio = dataInicio != null 
                 ? LocalDate.parse(dataInicio).atStartOfDay() 
                 : LocalDateTime.now().minusDays(30);
@@ -140,20 +143,25 @@ public class ContaService {
                 ? LocalDate.parse(dataFim).atTime(23, 59, 59) 
                 : LocalDateTime.now();
 
-        return transacaoRepository.findByContaAndPeriodo(contaId, inicio, fim);
+        System.out.println("[DEBUG] Buscando transações de " + inicio + " até " + fim);
+        List<Transacao> resultado = transacaoRepository.findByContaAndPeriodo(contaId, inicio, fim);
+        System.out.println("[DEBUG] Encontradas " + resultado.size() + " transações");
+        
+        return resultado;
     }
 
     private void validarLimites(Conta conta, TransferenciaRequest request) {
         LocalDate hoje = LocalDate.now();
+        Transacao.TipoTransacao tipo = Transacao.TipoTransacao.valueOf(request.getTipoTransferencia());
         BigDecimal totalTransferencias = transacaoRepository
-                .sumValorByContaAndTipoAndData(conta.getId(), request.getTipoTransferencia(), hoje);
+                .sumValorByContaAndTipoAndData(conta.getId(), tipo, hoje);
 
         BigDecimal limiteAtual = totalTransferencias != null ? totalTransferencias : BigDecimal.ZERO;
         BigDecimal novoTotal = limiteAtual.add(request.getValor());
 
         BigDecimal limite = switch (request.getTipoTransferencia()) {
-            case "PIX" -> conta.getLimiteDiarioPix();
-            case "TED", "DOC" -> conta.getLimiteDiarioTransferencia();
+            case "PIX" -> conta.getLimitePixDiario();
+            case "TED", "DOC" -> conta.getLimiteTransferenciaDiario();
             default -> BigDecimal.valueOf(999999);
         };
 

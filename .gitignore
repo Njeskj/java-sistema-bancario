@@ -1,6 +1,41 @@
+# Arquivos compilados
 bin/
 *.class
-.LCK*
+target/
+*.jar
+*.war
+*.ear
+*.original
+
+# Logs
+*.log
+backend-log.txt
+backend-debug.txt
+logs/
+
+# Dependências
 mysql-connector-j-*.jar
+node_modules/
+.pnpm-store/
+
+# Arquivos de teste e relatórios
+test-*.json
+*-report.json
+
+# Arquivos de lock
+.LCK*
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+.project
+.classpath
+.settings/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Diversos
 .github/
-node_modules

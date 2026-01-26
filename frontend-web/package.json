@@ -16,6 +16,8 @@
     "chart.js": "^4.5.1",
     "date-fns": "^3.0.6",
     "i18next": "^23.7.16",
+    "jspdf": "^4.0.0",
+    "jspdf-autotable": "^5.0.7",
     "jwt-decode": "^4.0.0",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.10",
@@ -24,9 +26,11 @@
     "react-hook-form": "^7.49.3",
     "react-i18next": "^14.0.0",
     "react-router-dom": "^6.21.1",
-    "recharts": "^2.15.4"
+    "recharts": "^2.15.4",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.0",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "@vitejs/plugin-react": "^4.2.1",

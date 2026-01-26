@@ -19,8 +19,16 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        AuthResponse response = authService.login(request);
-        return ResponseEntity.ok(response);
+        try {
+            System.out.println("[CONTROLLER] Recebendo requisição de login para: " + request.getEmailOuCpf());
+            AuthResponse response = authService.login(request);
+            System.out.println("[CONTROLLER] Login bem-sucedido!");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.out.println("[CONTROLLER] Erro no login: " + e.getClass().getName() + " - " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @PostMapping("/register")

@@ -25,6 +25,10 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     @Query("SELECT u FROM Usuario u WHERE u.emailHash = :emailHash AND u.ativo = true")
     Optional<Usuario> findActiveUsuarioByEmailHash(@Param("emailHash") String emailHash);
     
+    @Query("SELECT u FROM Usuario u WHERE (u.email = :email OR u.cpf = :cpf) AND u.ativo = true")
+    Optional<Usuario> findByEmailOrCpf(@Param("email") String email, @Param("cpf") String cpf);
+    
     @Query("SELECT COUNT(u) FROM Usuario u WHERE u.nacionalidade = :nacionalidade AND u.ativo = true")
     long countByNacionalidade(@Param("nacionalidade") String nacionalidade);
 }
+

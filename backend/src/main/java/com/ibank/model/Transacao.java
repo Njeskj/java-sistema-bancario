@@ -1,5 +1,6 @@
 package com.ibank.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,10 +24,12 @@ public class Transacao {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conta_origem_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "usuario", "transacoesOrigem", "transacoesDestino"})
     private Conta contaOrigem;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conta_destino_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "usuario", "transacoesOrigem", "transacoesDestino"})
     private Conta contaDestino;
 
     @Enumerated(EnumType.STRING)

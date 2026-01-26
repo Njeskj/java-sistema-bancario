@@ -13,19 +13,43 @@ import {
   Fade,
   Zoom,
   Avatar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Alert,
+  Slider,
+  FormControlLabel,
+  Divider,
+  TextField,
 } from '@mui/material';
 import { CreditCard, Block, Lock, Add, Visibility, Settings, ContactlessOutlined } from '@mui/icons-material';
 
 export default function Cards() {
   const [showNumbers, setShowNumbers] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [dialogType, setDialogType] = useState<'bloquear' | 'desbloquear' | 'configurar' | 'solicitar'>('bloquear');
+  const [cartaoSelecionado, setCartaoSelecionado] = useState<number | null>(null);
   
-  const cartoes = [
+  // Estados para configurações do cartão
+  const [limiteCredito, setLimiteCredito] = useState(10000);
+  const [notificacoes, setNotificacoes] = useState({
+    compras: true,
+    pagamentos: true,
+    saques: false,
+  });
+  const [comprasInternacionais, setComprasInternacionais] = useState(true);
+  const [senhaAtual, setSenhaAtual] = useState('');
+  const [novaSenha, setNovaSenha] = useState('');
+  const [confirmarSenha, setConfirmarSenha] = useState('');
+  
+  const [cartoes, setCartoes] = useState([
     {
       id: 1,
       tipo: 'Crédito',
       numero: '**** **** **** 1234',
       numeroCompleto: '4532 1234 5678 1234',
-      nome: 'ISRAEL SILVA',
+      nome: 'ADMIN SISTEMA',
       bandeira: 'Visa',
       limite: 10000,
       utilizado: 3500,
@@ -39,14 +63,71 @@ export default function Cards() {
       tipo: 'Débito',
       numero: '**** **** **** 5678',
       numeroCompleto: '5412 7534 8765 5678',
-      nome: 'ISRAEL SILVA',
+      nome: 'ADMIN SISTEMA',
       bandeira: 'Mastercard',
       vencimento: '06/27',
       cvv: '456',
       bloqueado: false,
       cor: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
     },
-  ];
+  ]);
+
+  const handleToggleBloqueio = (id: number) => {
+    const cartao = cartoes.find(c => c.id === id);
+    if (cartao) {
+      setCartaoSelecionado(id);
+      setDialogType(cartao.bloqueado ? 'desbloquear' : 'bloquear');
+      setOpenDialog(true);
+    }
+  };
+
+  const confirmarBloqueio = () => {
+    if (cartaoSelecionado) {
+      setCartoes(cartoes.map(c => 
+        c.id === cartaoSelecionado 
+          ? { ...c, bloqueado: !c.bloqueado }
+          : c
+      ));
+    }
+    setOpenDialog(false);
+  };
+
+  const handleConfigurar = (id: number) => {
+    setCartaoSelecionado(id);
+    setDialogType('configurar');
+    setOpenDialog(true);
+  };
+
+  const handleSolicitarCartao = () => {
+    setDialogType('solicitar');
+    setOpenDialog(true);
+  };
+
+  const handleSalvarConfiguracoes = () => {
+    // Aqui você pode adicionar lógica para salvar no backend
+    console.log('Configurações salvas:', {
+      limiteCredito,
+      notificacoes,
+      comprasInternacionais,
+    });
+    setOpenDialog(false);
+  };
+
+  const handleAlterarSenha = () => {
+    if (novaSenha !== confirmarSenha) {
+      alert('As senhas não coincidem!');
+      return;
+    }
+    if (novaSenha.length < 4) {
+      alert('A senha deve ter no mínimo 4 dígitos!');
+      return;
+    }
+    console.log('Senha alterada com sucesso');
+    setSenhaAtual('');
+    setNovaSenha('');
+    setConfirmarSenha('');
+    alert('Senha alterada com sucesso!');
+  };
 
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, bgcolor: '#f5f7fa', minHeight: '100vh' }}>
@@ -62,6 +143,7 @@ export default function Cards() {
           <Button 
             variant="contained" 
             startIcon={<Add />}
+            onClick={handleSolicitarCartao}
             sx={{
               borderRadius: 3,
               px: 3,
@@ -215,14 +297,21 @@ export default function Cards() {
                       justifyContent: 'space-between', 
                       alignItems: 'center',
                       p: 2,
-                      bgcolor: '#f5f7fa',
-                      borderRadius: 2
+                      bgcolor: cartao.bloqueado ? '#ffebee' : '#e8f5e9',
+                      borderRadius: 2,
+                      border: `2px solid ${cartao.bloqueado ? '#ef5350' : '#66bb6a'}`
                     }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Lock color="primary" />
-                        <Typography fontWeight={600}>Cartão Bloqueado</Typography>
+                        <Lock color={cartao.bloqueado ? 'error' : 'success'} />
+                        <Typography fontWeight={600}>
+                          {cartao.bloqueado ? 'Cartão Bloqueado' : 'Cartão Ativo'}
+                        </Typography>
                       </Box>
-                      <Switch checked={cartao.bloqueado} />
+                      <Switch 
+                        checked={cartao.bloqueado} 
+                        onChange={() => handleToggleBloqueio(cartao.id)}
+                        color={cartao.bloqueado ? 'error' : 'success'}
+                      />
                     </Box>
                   </Grid>
                   <Grid item xs={6}>
@@ -230,6 +319,7 @@ export default function Cards() {
                       variant="outlined"
                       fullWidth
                       startIcon={<Settings />}
+                      onClick={() => handleConfigurar(cartao.id)}
                       sx={{ 
                         borderRadius: 2,
                         py: 1.5,
@@ -248,22 +338,245 @@ export default function Cards() {
                       variant="contained"
                       fullWidth
                       startIcon={<Block />}
-                      color="error"
+                      onClick={() => handleToggleBloqueio(cartao.id)}
+                      color={cartao.bloqueado ? 'success' : 'error'}
                       sx={{ 
                         borderRadius: 2,
                         py: 1.5,
                         fontWeight: 600
                       }}
                     >
-                      Bloquear
+                      {cartao.bloqueado ? 'Desbloquear' : 'Bloquear'}
                     </Button>
                   </Grid>
                 </Grid>
               </Paper>
             </Fade>
           </Grid>
-        ))}
+))}
       </Grid>
+
+      {/* Dialog de Confirmação */}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth disableRestoreFocus>
+        <DialogTitle>
+          {dialogType === 'bloquear' && '🔒 Bloquear Cartão'}
+          {dialogType === 'desbloquear' && '✅ Desbloquear Cartão'}
+          {dialogType === 'configurar' && '⚙️ Configurações do Cartão'}
+          {dialogType === 'solicitar' && '📝 Solicitar Novo Cartão'}
+        </DialogTitle>
+        <DialogContent>
+          {dialogType === 'bloquear' && (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              <Typography variant="body2">
+                Ao bloquear o cartão, todas as transações serão recusadas até que você desbloqueie novamente.
+              </Typography>
+            </Alert>
+          )}
+          {dialogType === 'desbloquear' && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              <Typography variant="body2">
+                Deseja desbloquear este cartão? Ele voltará a funcionar normalmente.
+              </Typography>
+            </Alert>
+          )}
+          {dialogType === 'configurar' && (
+            <Box sx={{ py: 2 }}>
+              {/* Limite de Crédito */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                  💳 Limite de Crédito
+                </Typography>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Ajuste o limite do seu cartão de crédito
+                </Typography>
+                <Box sx={{ px: 2, mt: 3 }}>
+                  <Slider
+                    value={limiteCredito}
+                    onChange={(e, newValue) => setLimiteCredito(newValue as number)}
+                    min={1000}
+                    max={50000}
+                    step={500}
+                    marks={[
+                      { value: 1000, label: 'R$ 1k' },
+                      { value: 25000, label: 'R$ 25k' },
+                      { value: 50000, label: 'R$ 50k' },
+                    ]}
+                    valueLabelDisplay="on"
+                    valueLabelFormat={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
+                  />
+                </Box>
+                <Typography variant="h6" color="primary" sx={{ mt: 2, textAlign: 'center' }}>
+                  R$ {limiteCredito.toLocaleString('pt-BR')}
+                </Typography>
+              </Box>
+
+              <Divider sx={{ my: 3 }} />
+
+              {/* Notificações */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                  🔔 Notificações
+                </Typography>
+                <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 2 }}>
+                  Escolha quais notificações deseja receber
+                </Typography>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={notificacoes.compras}
+                      onChange={(e) => setNotificacoes({ ...notificacoes, compras: e.target.checked })}
+                      color="primary"
+                    />
+                  }
+                  label="Notificar compras realizadas"
+                  sx={{ display: 'flex', mb: 1 }}
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={notificacoes.pagamentos}
+                      onChange={(e) => setNotificacoes({ ...notificacoes, pagamentos: e.target.checked })}
+                      color="primary"
+                    />
+                  }
+                  label="Notificar vencimento de faturas"
+                  sx={{ display: 'flex', mb: 1 }}
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={notificacoes.saques}
+                      onChange={(e) => setNotificacoes({ ...notificacoes, saques: e.target.checked })}
+                      color="primary"
+                    />
+                  }
+                  label="Notificar saques em caixas eletrônicos"
+                  sx={{ display: 'flex' }}
+                />
+              </Box>
+
+              <Divider sx={{ my: 3 }} />
+
+              {/* Compras Internacionais */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                  🌍 Compras Internacionais
+                </Typography>
+                <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 2 }}>
+                  Habilite ou desabilite compras no exterior
+                </Typography>
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  p: 2,
+                  bgcolor: comprasInternacionais ? '#e8f5e9' : '#ffebee',
+                  borderRadius: 2,
+                  border: `2px solid ${comprasInternacionais ? '#66bb6a' : '#ef5350'}`
+                }}>
+                  <Box>
+                    <Typography fontWeight={600}>
+                      {comprasInternacionais ? 'Compras Habilitadas' : 'Compras Bloqueadas'}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {comprasInternacionais ? 'Você pode fazer compras no exterior' : 'Compras internacionais bloqueadas'}
+                    </Typography>
+                  </Box>
+                  <Switch 
+                    checked={comprasInternacionais}
+                    onChange={(e) => setComprasInternacionais(e.target.checked)}
+                    color={comprasInternacionais ? 'success' : 'error'}
+                  />
+                </Box>
+              </Box>
+
+              <Divider sx={{ my: 3 }} />
+
+              {/* Senha do Cartão */}
+              <Box>
+                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                  🔐 Gerenciar Senha
+                </Typography>
+                <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 2 }}>
+                  Altere a senha do seu cartão
+                </Typography>
+                <TextField
+                  fullWidth
+                  type="password"
+                  label="Senha Atual"
+                  value={senhaAtual}
+                  onChange={(e) => setSenhaAtual(e.target.value)}
+                  sx={{ mb: 2 }}
+                />
+                <TextField
+                  fullWidth
+                  type="password"
+                  label="Nova Senha (4 dígitos)"
+                  value={novaSenha}
+                  onChange={(e) => setNovaSenha(e.target.value)}
+                  inputProps={{ maxLength: 4 }}
+                  sx={{ mb: 2 }}
+                />
+                <TextField
+                  fullWidth
+                  type="password"
+                  label="Confirmar Nova Senha"
+                  value={confirmarSenha}
+                  onChange={(e) => setConfirmarSenha(e.target.value)}
+                  inputProps={{ maxLength: 4 }}
+                  sx={{ mb: 2 }}
+                />
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  onClick={handleAlterarSenha}
+                  disabled={!senhaAtual || !novaSenha || !confirmarSenha}
+                  sx={{ mt: 1 }}
+                >
+                  Alterar Senha
+                </Button>
+              </Box>
+            </Box>
+          )}
+          {dialogType === 'solicitar' && (
+            <Box sx={{ py: 2 }}>
+              <Typography variant="body1" gutterBottom>
+                Tipos de cartão disponíveis:
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                • Cartão de Crédito (Visa/Mastercard)
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                • Cartão de Débito
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                • Cartão Virtual
+              </Typography>
+              <Alert severity="info" sx={{ mt: 2 }}>
+                Entre em contato com nosso atendimento para solicitar um novo cartão.
+              </Alert>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>Cancelar</Button>
+          {(dialogType === 'bloquear' || dialogType === 'desbloquear') && (
+            <Button variant="contained" onClick={confirmarBloqueio} color={dialogType === 'bloquear' ? 'error' : 'success'}>
+              Confirmar
+            </Button>
+          )}
+          {dialogType === 'configurar' && (
+            <Button variant="contained" onClick={handleSalvarConfiguracoes}>
+              Salvar Configurações
+            </Button>
+          )}
+          {dialogType === 'solicitar' && (
+            <Button variant="contained" onClick={() => setOpenDialog(false)}>
+              Fechar
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

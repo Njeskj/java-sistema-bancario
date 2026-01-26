@@ -1,23 +1,25 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { ThemeProvider as MuiThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { ptBR } from '@mui/material/locale';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import App from './App';
 import './i18n/config';
+import { ThemeProvider } from './contexts/ThemeContext';
+import './styles/theme.css';
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
-      light: '#42a5f5',
-      dark: '#1565c0',
+      main: '#2196F3',
+      light: '#64B5F6',
+      dark: '#1976D2',
     },
     secondary: {
-      main: '#dc004e',
-      light: '#e33371',
-      dark: '#9a0036',
+      main: '#1565C0',
+      light: '#42A5F5',
+      dark: '#0D47A1',
     },
     success: {
       main: '#4caf50',
@@ -29,8 +31,8 @@ const theme = createTheme({
       main: '#f44336',
     },
     background: {
-      default: '#f5f5f5',
-      paper: '#ffffff',
+      default: '#F5F7FA',
+      paper: '#FFFFFF',
     },
   },
   typography: {
@@ -84,10 +86,12 @@ const theme = createTheme({
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <App />
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <ThemeProvider>
+        <MuiThemeProvider theme={theme}>
+          <CssBaseline />
+          <App />
+        </MuiThemeProvider>
       </ThemeProvider>
     </BrowserRouter>
   </React.StrictMode>
