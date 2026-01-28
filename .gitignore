@@ -71,3 +71,6 @@ Thumbs.db
 
 # Diversos
 .github/
+
+# Pasta de arquivos locais organizados
+_local/
