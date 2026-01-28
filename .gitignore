@@ -40,8 +40,19 @@ database-indexes-v2.sql
 restore-database.sql
 sync-database-schema.sql
 
+# Arquivos de utilitários/teste do backend
+HashGen.java
+TestBCrypt.java
+
+# Screenshots e imagens de desenvolvimento
+*-screenshot.png
+
+# Pasta .expo gerada automaticamente
+.expo/
+
 # Documentação de desenvolvimento (manter apenas em _docs/)
 COMO-INSTALAR-MAVEN.md
+MELHORIAS-IMPLEMENTADAS.md
 
 # Arquivos de lock
 .LCK*
