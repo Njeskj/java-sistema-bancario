@@ -19,8 +19,29 @@ node_modules/
 .pnpm-store/
 
 # Arquivos de teste e relatórios
+test-*.js
+test-*.bat
 test-*.json
+test-*.png
 *-report.json
+load-test.js
+
+# Scripts temporários de desenvolvimento
+recompilar-backend.bat
+*.bat.backup
+
+# Scripts SQL temporários/manutenção pontual
+add-columns.sql
+fix-password.sql
+update-admin-password.sql
+update-usuarios-table.sql
+database-indexes.sql
+database-indexes-v2.sql
+restore-database.sql
+sync-database-schema.sql
+
+# Documentação de desenvolvimento (manter apenas em _docs/)
+COMO-INSTALAR-MAVEN.md
 
 # Arquivos de lock
 .LCK*
