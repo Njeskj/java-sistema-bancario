@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import * as SecureStore from 'expo-secure-store';
+import storage from './src/utils/storage';
 
 // Screens
 import LoginScreen from './src/screens/LoginScreen';
@@ -103,7 +103,7 @@ export default function App() {
 
   const checkAuthentication = async () => {
     try {
-      const token = await SecureStore.getItemAsync('token');
+      const token = await storage.getItem('token');
       setIsAuthenticated(!!token);
     } catch (error) {
       console.error('Error checking authentication:', error);

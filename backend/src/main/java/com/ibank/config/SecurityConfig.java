@@ -1,5 +1,6 @@
 package com.ibank.config;
 
+import com.ibank.filter.RateLimitingFilter;
 import com.ibank.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -35,9 +36,12 @@ public class SecurityConfig {
     private boolean allowCredentials;
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RateLimitingFilter rateLimitingFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, 
+                         RateLimitingFilter rateLimitingFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.rateLimitingFilter = rateLimitingFilter;
     }
 
     @Bean
@@ -55,6 +59,7 @@ public class SecurityConfig {
                     "/health",
                     "/actuator/health",
                     "/actuator/info",
+                    "/actuator/prometheus",
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
@@ -63,6 +68,7 @@ public class SecurityConfig {
                 // Todos os outros endpoints requerem autenticação
                 .anyRequest().authenticated()
             )
+            .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

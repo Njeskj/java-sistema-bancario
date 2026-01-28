@@ -1,0 +1,116 @@
+spring:
+  application:
+    name: ibank-api
+  
+  profiles:
+    active: production
+  
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 10
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+      connection-test-query: SELECT 1
+  
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+      ssl: true
+  
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+
+server:
+  port: 8081
+  compression:
+    enabled: true
+    min-response-size: 1024
+  http2:
+    enabled: true
+  ssl:
+    enabled: ${SSL_ENABLED:false}
+    key-store: ${SSL_KEY_STORE}
+    key-store-password: ${SSL_KEY_STORE_PASSWORD}
+
+# JWT
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 3600000   # 1 hora em produção
+  refresh-expiration: 604800000
+
+# Encryption
+encryption:
+  key: ${ENCRYPTION_KEY}
+
+# CORS - Muito restritivo para produção
+cors:
+  allowed-origin-patterns: https://ibank.com,https://www.ibank.com
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+  allowed-headers: Authorization,Content-Type,X-Requested-With
+  exposed-headers: Authorization
+  allow-credentials: true
+
+# Security
+security:
+  max-login-attempts: 3
+  lockout-duration: 1800000  # 30 minutos
+  require-2fa-for-high-value: true
+  high-value-threshold: 1000.00
+
+# Logging - JSON estruturado
+logging:
+  level:
+    root: WARN
+    com.ibank: INFO
+    org.springframework.security: WARN
+    org.hibernate: WARN
+  file:
+    name: /var/log/ibank/application.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Actuator - Mínimo exposto
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: never
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  tracing:
+    sampling:
+      probability: 0.1  # Apenas 10% das requisições
+
+# Rate Limiting mais agressivo
+rate-limit:
+  requests-per-minute: 30
+  requests-per-hour: 500

@@ -8,6 +8,10 @@ import com.ibank.repository.ContaRepository;
 import com.ibank.service.ContaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -140,12 +144,33 @@ public class ContaController {
     public ResponseEntity<?> getExtrato(
             @PathVariable Long contaId,
             @RequestParam(required = false) String dataInicio,
-            @RequestParam(required = false) String dataFim) {
+            @RequestParam(required = false) String dataFim,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "dataTransacao,desc") String sort) {
         try {
-            System.out.println("[DEBUG] getExtrato chamado - contaId: " + contaId + ", dataInicio: " + dataInicio + ", dataFim: " + dataFim);
-            List<Transacao> extrato = contaService.getExtrato(contaId, dataInicio, dataFim);
-            System.out.println("[DEBUG] Extrato retornou " + extrato.size() + " transações");
-            return ResponseEntity.ok(extrato);
+            System.out.println("[DEBUG] getExtrato chamado - contaId: " + contaId + ", page: " + page + ", size: " + size);
+            
+            // Parse sort parameter
+            String[] sortParams = sort.split(",");
+            Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("asc") 
+                ? Sort.Direction.ASC : Sort.Direction.DESC;
+            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
+            
+            Page<Transacao> extratoPage = contaService.getExtratoPaginado(contaId, dataInicio, dataFim, pageable);
+            
+            Map<String, Object> response = Map.of(
+                "content", extratoPage.getContent(),
+                "totalElements", extratoPage.getTotalElements(),
+                "totalPages", extratoPage.getTotalPages(),
+                "currentPage", extratoPage.getNumber(),
+                "pageSize", extratoPage.getSize(),
+                "hasNext", extratoPage.hasNext(),
+                "hasPrevious", extratoPage.hasPrevious()
+            );
+            
+            System.out.println("[DEBUG] Extrato retornou " + extratoPage.getNumberOfElements() + " transações da página " + page);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             System.out.println("[ERRO] Erro ao buscar extrato: " + e.getMessage());
             e.printStackTrace();

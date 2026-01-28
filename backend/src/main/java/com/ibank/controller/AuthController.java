@@ -2,6 +2,7 @@ package com.ibank.controller;
 
 import com.ibank.dto.AuthResponse;
 import com.ibank.dto.LoginRequest;
+import com.ibank.dto.RefreshTokenRequest;
 import com.ibank.dto.RegistroRequest;
 import com.ibank.service.AuthService;
 import jakarta.validation.Valid;
@@ -38,8 +39,8 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refreshToken(@RequestHeader("Authorization") String refreshToken) {
-        AuthResponse response = authService.refreshToken(refreshToken);
+    public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        AuthResponse response = authService.refreshToken(request.getRefreshToken());
         return ResponseEntity.ok(response);
     }
 

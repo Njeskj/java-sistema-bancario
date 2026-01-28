@@ -8,6 +8,8 @@ import com.ibank.repository.ContaRepository;
 import com.ibank.repository.TransacaoRepository;
 import com.ibank.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -146,6 +148,24 @@ public class ContaService {
         System.out.println("[DEBUG] Buscando transações de " + inicio + " até " + fim);
         List<Transacao> resultado = transacaoRepository.findByContaAndPeriodo(contaId, inicio, fim);
         System.out.println("[DEBUG] Encontradas " + resultado.size() + " transações");
+        
+        return resultado;
+    }
+
+    public Page<Transacao> getExtratoPaginado(Long contaId, String dataInicio, String dataFim, Pageable pageable) {
+        System.out.println("[DEBUG] ContaService.getExtratoPaginado - contaId: " + contaId);
+        System.out.println("[DEBUG] Page: " + pageable.getPageNumber() + ", Size: " + pageable.getPageSize());
+        
+        LocalDateTime inicio = dataInicio != null 
+                ? LocalDate.parse(dataInicio).atStartOfDay() 
+                : LocalDateTime.now().minusDays(30);
+        LocalDateTime fim = dataFim != null 
+                ? LocalDate.parse(dataFim).atTime(23, 59, 59) 
+                : LocalDateTime.now();
+
+        System.out.println("[DEBUG] Buscando transações de " + inicio + " até " + fim);
+        Page<Transacao> resultado = transacaoRepository.findByContaAndPeriodoPaginado(contaId, inicio, fim, pageable);
+        System.out.println("[DEBUG] Página " + resultado.getNumber() + " com " + resultado.getNumberOfElements() + " transações de " + resultado.getTotalElements() + " total");
         
         return resultado;
     }

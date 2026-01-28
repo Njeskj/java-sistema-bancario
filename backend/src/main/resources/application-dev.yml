@@ -1,0 +1,69 @@
+spring:
+  application:
+    name: ibank-api
+  
+  profiles:
+    active: dev
+  
+  datasource:
+    url: jdbc:mysql://localhost:3306/java_dev?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: 8081
+
+# JWT
+jwt:
+  secret: ${JWT_SECRET:DevSecretKeyForLocalDevelopmentOnly}
+  expiration: 86400000
+  refresh-expiration: 604800000
+
+# Encryption
+encryption:
+  key: ${ENCRYPTION_KEY:DevEncryptionKey123456789012}
+
+# CORS - Permissivo para dev
+cors:
+  allowed-origin-patterns: "*"
+  allowed-methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+  allowed-headers: "*"
+  allow-credentials: true
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.ibank: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always

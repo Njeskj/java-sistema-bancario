@@ -3,6 +3,7 @@ package com.ibank.service;
 import com.ibank.dto.AuthResponse;
 import com.ibank.dto.LoginRequest;
 import com.ibank.dto.RegistroRequest;
+import com.ibank.model.RefreshToken;
 import com.ibank.model.Usuario;
 import com.ibank.repository.UsuarioRepository;
 import com.ibank.util.EncryptionUtil;
@@ -23,6 +24,7 @@ public class AuthService {
     private final EncryptionUtil encryptionUtil;
     private final JwtUtil jwtUtil;
     private final TwoFactorAuthUtil twoFactorAuthUtil;
+    private final RefreshTokenService refreshTokenService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Transactional
@@ -30,19 +32,15 @@ public class AuthService {
         String identifier = request.getEmailOuCpf();
         Usuario usuario;
         
-        System.out.println("[DEBUG] Tentativa de login com: " + identifier);
-        
         // Detectar se é email ou CPF
         if (identifier.contains("@")) {
             // É email
             String emailHash = encryptionUtil.hash(identifier);
-            System.out.println("[DEBUG] Buscando por email hash: " + emailHash.substring(0, 20) + "...");
             usuario = usuarioRepository.findActiveUsuarioByEmailHash(emailHash)
                     .orElseThrow(() -> new RuntimeException("Usuário não encontrado ou inativo"));
         } else {
             // É CPF
             String cpfHash = encryptionUtil.hash(identifier);
-            System.out.println("[DEBUG] Buscando por CPF hash: " + cpfHash.substring(0, 20) + "...");
             usuario = usuarioRepository.findActiveUsuarioByCpfHash(cpfHash)
                     .orElseThrow(() -> new RuntimeException("Usuário não encontrado ou inativo"));
         }
@@ -80,16 +78,11 @@ public class AuthService {
         );
 
         System.out.println("[DEBUG] Gerando refresh token...");
-        String refreshToken = jwtUtil.generateRefreshToken(
-            new org.springframework.security.core.userdetails.User(
-                usuario.getCpfHash(), "", java.util.Collections.emptyList()
-            ),
-            usuario.getId()
-        );
+        RefreshToken refreshTokenEntity = refreshTokenService.createRefreshToken(usuario.getCpfHash());
 
         return AuthResponse.builder()
                 .token(token)
-                .refreshToken(refreshToken)
+                .refreshToken(refreshTokenEntity.getToken())
                 .tipo("Bearer")
                 .usuarioId(usuario.getId())
                 .nomeCompleto(usuario.getNomeCompleto())
@@ -162,13 +155,38 @@ public class AuthService {
                 .build();
     }
 
-    public AuthResponse refreshToken(String refreshToken) {
-        // Implementar lógica de refresh
-        throw new RuntimeException("Not implemented");
+    public AuthResponse refreshToken(String refreshTokenStr) {
+        RefreshToken refreshToken = refreshTokenService.findByToken(refreshTokenStr)
+                .orElseThrow(() -> new RuntimeException("Refresh token não encontrado"));
+
+        if (!refreshTokenService.isTokenValid(refreshToken)) {
+            throw new RuntimeException("Refresh token inválido ou expirado");
+        }
+
+        Usuario usuario = usuarioRepository.findActiveUsuarioByCpfHash(refreshToken.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        String newAccessToken = jwtUtil.generateToken(
+            new org.springframework.security.core.userdetails.User(
+                usuario.getCpfHash(), "", java.util.Collections.emptyList()
+            ),
+            usuario.getId(),
+            usuario.getNacionalidade()
+        );
+
+        return AuthResponse.builder()
+                .token(newAccessToken)
+                .refreshToken(refreshTokenStr)
+                .tipo("Bearer")
+                .usuarioId(usuario.getId())
+                .build();
     }
 
     public void logout(String token) {
-        // Implementar revogação de token
+        // Extrai username do token JWT
+        String username = jwtUtil.extractUsername(token.replace("Bearer ", ""));
+        // Revoga o refresh token associado
+        refreshTokenService.revokeToken(username);
     }
 
     public AuthResponse enable2FA(String token) {
