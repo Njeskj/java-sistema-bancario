@@ -27,26 +27,39 @@ Estes scripts são para manutenção pontual e não devem estar na branch princi
 - `restore-database.sql`
 - `sync-database-schema.sql`
 
-### 4. **Arquivos Compilados**
+### 4. **Utilitários de Desenvolvimento**
+- `backend/HashGen.java` - Utilitário para gerar hashes BCrypt
+- `backend/TestBCrypt.java` - Utilitário para testar hashes BCrypt
+
+### 5. **Arquivos Gerados Automaticamente**
+- `.expo/` - Cache e arquivos gerados pelo Expo (React Native)
 - `target/` - Arquivos compilados do Maven
 - `*.class` - Bytecode Java
 - `*.jar`, `*.war`, `*.ear` - Archives Java
 
-### 5. **Logs**
+### 6. **Screenshots e Imagens de Desenvolvimento**
+- `*-screenshot.png` - Screenshots para documentação/desenvolvimento
+- `test-*.png` - Imagens geradas durante testes
+
+### 7. **Logs**
 - `*.log`
 - `backend-log.txt`
 - `backend-debug.txt`
 - `logs/`
 
-### 6. **Dependências**
+### 8. **Dependências**
 - `node_modules/` - Dependências Node.js
 - `mysql-connector-j-*.jar`
 
-### 7. **Configurações de IDE**
+### 9. **Configurações de IDE**
 - `.idea/` - IntelliJ IDEA
 - `.vscode/` - Visual Studio Code
 - `*.iml`
 - `.project`, `.classpath`, `.settings/`
+
+### 10. **Documentação Duplicada**
+- `MELHORIAS-IMPLEMENTADAS.md` - Mantido apenas em `_docs/`
+- `COMO-INSTALAR-MAVEN.md` - Mantido apenas em `_docs/`
 
 ## 📂 Pastas de Desenvolvimento Local
 
